@@ -189,7 +189,7 @@
       <div class="waiting">
         <p style="font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:1.5rem">${msg}</p>
         <div><span class="waiting-dot"></span><span class="waiting-dot"></span><span class="waiting-dot"></span></div>
-        <p style="font-size:0.8rem;color:var(--muted);margin-top:1.5rem">La pagina si aggiorna automaticamente</p>
+        <p style="font-size:0.8rem;color:var(--muted);margin-top:1.5rem">Aggiorna la pagina quando ti viene indicato</p>
       </div>`;
   }
 
@@ -336,21 +336,7 @@
     }
   };
 
-  // ─── REALTIME STATO ───────────────────────────────────────────────────────
-  function subscribeStato() {
-    supabase
-      .channel('stato-questionario')
-      .on('postgres_changes', {
-        event: 'UPDATE', schema: 'public', table: 'stato_evento', filter: 'id=eq.evento'
-      }, payload => {
-        const nuova = payload.new.domanda_attiva;
-        if (nuova !== domandaAttiva) {
-          domandaAttiva = nuova;
-          render();
-        }
-      })
-      .subscribe();
-  }
+  // ─── NESSUN REALTIME — i partecipanti aggiornano la pagina manualmente ──────
 
   // ─── INIT ─────────────────────────────────────────────────────────────────
   async function init() {
@@ -379,7 +365,6 @@
     }
 
     domandaAttiva = data.domanda_attiva;
-    subscribeStato();
     render();
   }
 
