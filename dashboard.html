@@ -233,8 +233,8 @@
       ${[['A',totA],['B',totB],['C',totC]].map(([g,t]) => `
         <div class="stat-card">
           <div class="stat-lbl" style="color:${COL[g]}">Gruppo ${g}</div>
-          <div class="stat-val">${t}</div>
-          <div class="stat-sub">rispost${t===1?'a':'e'}</div>
+          <div class="stat-val" data-gruppo="${g}">${t}</div>
+          <div class="stat-sub" data-gruppo="${g}">rispost${t===1?'a':'e'}</div>
         </div>`).join('')}
     </div>`;
 
@@ -326,16 +326,73 @@
     }
   }
 
+  // ─── AGGIORNA CHART SENZA RICREARE ───────────────────────────────────────
+  function aggiornaChart(n) {
+    if (!chartAttivo || n < 1 || n > DOMANDE.length) return;
+    const d    = DOMANDE[n - 1];
+    const dati = rispostePerDomanda[n] || [];
+
+    // Aggiorna stat cards
+    const totA = dati.filter(r => r.gruppo==='A').length;
+    const totB = dati.filter(r => r.gruppo==='B').length;
+    const totC = dati.filter(r => r.gruppo==='C').length;
+    [['A',totA],['B',totB],['C',totC]].forEach(([g,t]) => {
+      const card = document.querySelector(`.stat-val[data-gruppo="${g}"]`);
+      const sub  = document.querySelector(`.stat-sub[data-gruppo="${g}"]`);
+      if (card) card.textContent = t;
+      if (sub)  sub.textContent  = 'rispost' + (t===1?'a':'e');
+    });
+
+    // Aggiorna dati del grafico esistente senza distruggerlo
+    if (d.tipo === 'sinno') {
+      const cnt = { A:{si:0,no:0}, B:{si:0,no:0}, C:{si:0,no:0} };
+      dati.forEach(r => { if(cnt[r.gruppo]) cnt[r.gruppo][r.valore]++; });
+      chartAttivo.data.datasets[0].data = ['A','B','C'].map(g=>cnt[g].si);
+      chartAttivo.data.datasets[1].data = ['A','B','C'].map(g=>cnt[g].no);
+    } else if (d.tipo === 'scala') {
+      const cnt = { A:{1:0,2:0,3:0,4:0,5:0}, B:{1:0,2:0,3:0,4:0,5:0}, C:{1:0,2:0,3:0,4:0,5:0} };
+      dati.forEach(r => { const v=parseInt(r.valore); if(cnt[r.gruppo]&&cnt[r.gruppo][v]!==undefined) cnt[r.gruppo][v]++; });
+      ['A','B','C'].forEach((g,i) => { chartAttivo.data.datasets[i].data = [1,2,3,4,5].map(v=>cnt[g][v]); });
+    } else if (d.tipo === 'multipla') {
+      const cnt = {};
+      d.opzioni.forEach(op => { cnt[op]={A:0,B:0,C:0}; });
+      dati.forEach(r => { if(cnt[r.valore]) cnt[r.valore][r.gruppo]++; });
+      ['A','B','C'].forEach((g,i) => { chartAttivo.data.datasets[i].data = d.opzioni.map(op=>cnt[op][g]); });
+    } else if (d.tipo === 'numero') {
+      const FASCE = 6;
+      const step  = Math.ceil((d.max - d.min) / FASCE);
+      const getBucket = v => Math.min(Math.floor((parseInt(v)-d.min)/step), FASCE-1);
+      const cnt = { A:Array(FASCE).fill(0), B:Array(FASCE).fill(0), C:Array(FASCE).fill(0) };
+      dati.forEach(r => { if(cnt[r.gruppo]) cnt[r.gruppo][getBucket(r.valore)]++; });
+      ['A','B','C'].forEach((g,i) => { chartAttivo.data.datasets[i].data = cnt[g]; });
+    }
+    chartAttivo.update('none'); // 'none' = aggiorna senza animazione
+  }
+
   // ─── REALTIME ─────────────────────────────────────────────────────────────
+  let aggiornamentoPendente = false;
+
   function subscribeRisposte() {
     supabase.channel('dashboard-risposte')
       .on('postgres_changes', { event:'INSERT', schema:'public', table:'risposte' }, payload => {
         const r = payload.new;
         if (!rispostePerDomanda[r.domanda]) rispostePerDomanda[r.domanda] = [];
         rispostePerDomanda[r.domanda].push(r);
-        if (r.domanda === domandaVista) renderContent(domandaVista);
+        // Aggiorna contatore totale
+        const tot = Object.values(rispostePerDomanda).reduce((s,arr)=>s+arr.length,0);
+        document.getElementById('risposte-count').textContent = tot + ' rispost' + (tot===1?'a':'e') + ' totali';
+        // Segna aggiornamento pendente ma non ridisegna subito
+        if (r.domanda === domandaVista) aggiornamentoPendente = true;
       })
       .subscribe();
+
+    // Ridisegna al massimo una volta al secondo
+    setInterval(() => {
+      if (aggiornamentoPendente) {
+        aggiornamentoPendente = false;
+        aggiornaChart(domandaVista);
+      }
+    }, 1000);
   }
 
   // ─── RESET ────────────────────────────────────────────────────────────────
