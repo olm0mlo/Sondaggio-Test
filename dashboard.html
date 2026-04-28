@@ -329,7 +329,7 @@
   window.resetEvento = async function() {
     if (!confirm('Sei sicuro di voler azzerare tutto e ripartire dall\'inizio?')) return;
     await Promise.all([
-      supabase.from('risposte').delete().gte('id', 0),
+      supabase.rpc('reset_risposte'),
       supabase.from('stato_evento').update({ domanda_attiva: 0 }).eq('id','evento')
     ]);
     domandaAttiva = 0;
