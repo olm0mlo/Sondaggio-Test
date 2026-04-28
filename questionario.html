@@ -123,6 +123,7 @@
   function haRisposto(n) { return getCookie(COOKIE_PREFIX + n) === '1'; }
   function segnaRisposto(n, val) {
     setCookie(COOKIE_PREFIX + n, '1');
+    setCookie('sondaggio_val_' + n, val);
     risposteDate[n] = val;
   }
 
@@ -382,13 +383,6 @@
     render();
   }
 
-  // Override segnaRisposto per salvare anche il valore nel cookie
-  const _segnaRisposto = segnaRisposto;
-  function segnaRisposto(n, val) {
-    setCookie(COOKIE_PREFIX + n, '1');
-    setCookie('sondaggio_val_' + n, val);
-    risposteDate[n] = val;
-  }
 
   init();
 </script>
