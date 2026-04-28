@@ -238,91 +238,120 @@
         </div>`).join('')}
     </div>`;
 
-    document.getElementById('content-area').innerHTML =
-      statsHtml + `<div class="chart-card"><canvas id="chart-main"></canvas></div>`;
+    const isSiNo = d.tipo === 'sinno';
+    const chartHtml = isSiNo
+      ? `<div class="chart-card" style="display:flex;gap:1rem;align-items:center;justify-content:center;">
+           ${['A','B','C'].map(g => `
+             <div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;flex:1;">
+               <div style="font-family:'DM Serif Display',serif;font-size:1.3rem;color:${COL[g]}">${g}</div>
+               <div style="position:relative;width:160px;height:160px;">
+                 <canvas id="chart-${g}"></canvas>
+                 <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;">
+                   <div style="font-size:1.4rem;font-weight:600;" id="tot-pie-${g}">0</div>
+                   <div style="font-size:0.7rem;color:#7A7D8E;">risposte</div>
+                 </div>
+               </div>
+               <div style="display:flex;gap:12px;font-size:0.8rem;">
+                 <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:2px;background:#1DB87A;display:inline-block;"></span><span id="si-lbl-${g}">Si 0%</span></span>
+                 <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:2px;background:#E05A38;display:inline-block;"></span><span id="no-lbl-${g}">No 0%</span></span>
+               </div>
+             </div>`).join('')}
+         </div>`
+      : `<div class="chart-card"><canvas id="chart-main"></canvas></div>`;
 
-    if (chartAttivo) { chartAttivo.destroy(); chartAttivo = null; }
+    document.getElementById('content-area').innerHTML = statsHtml + chartHtml;
+
+    if (chartAttivo) {
+      if (Array.isArray(chartAttivo)) chartAttivo.forEach(c => c.destroy());
+      else chartAttivo.destroy();
+      chartAttivo = null;
+    }
     setTimeout(() => buildChart(d, dati), 30);
   }
 
   // ─── BUILD CHART ──────────────────────────────────────────────────────────
+  const ANIM = { duration: 600, easing: 'easeInOutQuart' };
+
+  const barOpts = {
+    responsive: true, maintainAspectRatio: true,
+    animation: ANIM,
+    plugins: {
+      legend: { labels: { color: '#F0EDE8', font: { family:'DM Sans', size:12 }, padding: 16 } },
+      title: { display: false }
+    },
+    scales: {
+      x: { ticks: { color:'#7A7D8E', font:{family:'DM Sans'} }, grid: { color:'rgba(255,255,255,0.05)' } },
+      y: { ticks: { color:'#7A7D8E', font:{family:'DM Sans'}, stepSize:1 }, grid: { color:'rgba(255,255,255,0.05)' }, beginAtZero:true }
+    }
+  };
+
+  function aggiornaPieLegend(g, si, no) {
+    const tot = si + no;
+    const siP = tot > 0 ? Math.round(si/tot*100) : 0;
+    const noP = tot > 0 ? 100 - siP : 0;
+    const totEl = document.getElementById('tot-pie-'+g);
+    const siEl  = document.getElementById('si-lbl-'+g);
+    const noEl  = document.getElementById('no-lbl-'+g);
+    if (totEl) totEl.textContent = tot;
+    if (siEl)  siEl.textContent  = `Si ${siP}%`;
+    if (noEl)  noEl.textContent  = `No ${noP}%`;
+  }
+
   function buildChart(d, dati) {
-    const ctx = document.getElementById('chart-main');
-    if (!ctx) return;
-
-    const opts = {
-      responsive: true, maintainAspectRatio: true,
-      animation: { duration: 400 },
-      plugins: {
-        legend: { labels: { color: '#F0EDE8', font: { family:'DM Sans', size:12 }, padding: 16 } },
-        title: { display: false }
-      },
-      scales: {
-        x: { ticks: { color:'#7A7D8E', font:{family:'DM Sans'} }, grid: { color:'rgba(255,255,255,0.05)' } },
-        y: { ticks: { color:'#7A7D8E', font:{family:'DM Sans'}, stepSize:1 }, grid: { color:'rgba(255,255,255,0.05)' }, beginAtZero:true }
-      }
-    };
-
     if (d.tipo === 'sinno') {
       const cnt = { A:{si:0,no:0}, B:{si:0,no:0}, C:{si:0,no:0} };
       dati.forEach(r => { if(cnt[r.gruppo]) cnt[r.gruppo][r.valore]++; });
-      chartAttivo = new Chart(ctx, {
-        type:'bar',
-        data:{
-          labels:['Gruppo A','Gruppo B','Gruppo C'],
-          datasets:[
-            { label:'Si',  data:['A','B','C'].map(g=>cnt[g].si), backgroundColor:'#1DB87A', borderRadius:5 },
-            { label:'No', data:['A','B','C'].map(g=>cnt[g].no), backgroundColor:'#E05A38', borderRadius:5 }
-          ]
-        }, options: opts
-      });
-    } else if (d.tipo === 'scala') {
-      const cnt = { A:{1:0,2:0,3:0,4:0,5:0}, B:{1:0,2:0,3:0,4:0,5:0}, C:{1:0,2:0,3:0,4:0,5:0} };
-      dati.forEach(r => { const v=parseInt(r.valore); if(cnt[r.gruppo]&&cnt[r.gruppo][v]!==undefined) cnt[r.gruppo][v]++; });
-      chartAttivo = new Chart(ctx, {
-        type:'bar',
-        data:{
-          labels:['1','2','3','4','5'],
-          datasets:['A','B','C'].map(g=>({
-            label:`Gruppo ${g}`, data:[1,2,3,4,5].map(v=>cnt[g][v]),
-            backgroundColor:COL_ALPHA[g], borderColor:COL[g], borderWidth:1, borderRadius:5
-          }))
-        }, options: opts
-      });
-    } else if (d.tipo === 'multipla') {
-      const cnt = {};
-      d.opzioni.forEach(op => { cnt[op]={A:0,B:0,C:0}; });
-      dati.forEach(r => { if(cnt[r.valore]) cnt[r.valore][r.gruppo]++; });
-      chartAttivo = new Chart(ctx, {
-        type:'bar',
-        data:{
+      chartAttivo = ['A','B','C'].map(g => {
+        const ctx = document.getElementById('chart-'+g);
+        if (!ctx) return null;
+        const si = cnt[g].si, no = cnt[g].no, tot = si + no;
+        aggiornaPieLegend(g, si, no);
+        return new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Si','No'],
+            datasets:[{ data: tot > 0 ? [si,no] : [1,0],
+              backgroundColor: tot > 0 ? ['#1DB87A','#E05A38'] : ['#2A2D3A','#2A2D3A'],
+              borderWidth: 3, borderColor: '#1A1D26', hoverOffset: 6
+            }]
+          },
+          options: {
+            responsive: false, cutout: '62%',
+            animation: ANIM,
+            plugins: { legend: { display: false } }
+          }
+        });
+      }).filter(Boolean);
+    } else {
+      const ctx = document.getElementById('chart-main');
+      if (!ctx) return;
+      if (d.tipo === 'scala') {
+        const cnt = { A:{1:0,2:0,3:0,4:0,5:0}, B:{1:0,2:0,3:0,4:0,5:0}, C:{1:0,2:0,3:0,4:0,5:0} };
+        dati.forEach(r => { const v=parseInt(r.valore); if(cnt[r.gruppo]&&cnt[r.gruppo][v]!==undefined) cnt[r.gruppo][v]++; });
+        chartAttivo = new Chart(ctx, { type:'bar', data:{ labels:['1','2','3','4','5'],
+          datasets:['A','B','C'].map(g=>({ label:`Gruppo ${g}`, data:[1,2,3,4,5].map(v=>cnt[g][v]),
+            backgroundColor:COL_ALPHA[g], borderColor:COL[g], borderWidth:1, borderRadius:5 }))
+        }, options: barOpts });
+      } else if (d.tipo === 'multipla') {
+        const cnt = {};
+        d.opzioni.forEach(op => { cnt[op]={A:0,B:0,C:0}; });
+        dati.forEach(r => { if(cnt[r.valore]) cnt[r.valore][r.gruppo]++; });
+        chartAttivo = new Chart(ctx, { type:'bar', data:{
           labels: d.opzioni.map(op => op.length>22 ? op.substring(0,22)+'...' : op),
-          datasets:['A','B','C'].map(g=>({
-            label:`Gruppo ${g}`, data:d.opzioni.map(op=>cnt[op][g]),
-            backgroundColor:COL_ALPHA[g], borderColor:COL[g], borderWidth:1, borderRadius:5
-          }))
-        }, options: opts
-      });
-    } else if (d.tipo === 'numero') {
-      const FASCE = 6;
-      const step  = Math.ceil((d.max - d.min) / FASCE);
-      const labels = Array.from({length:FASCE}, (_,i) => {
-        const da = d.min + i*step, a = Math.min(da+step-1, d.max);
-        return `${da}-${a}`;
-      });
-      const getBucket = v => Math.min(Math.floor((parseInt(v)-d.min)/step), FASCE-1);
-      const cnt = { A:Array(FASCE).fill(0), B:Array(FASCE).fill(0), C:Array(FASCE).fill(0) };
-      dati.forEach(r => { if(cnt[r.gruppo]) cnt[r.gruppo][getBucket(r.valore)]++; });
-      chartAttivo = new Chart(ctx, {
-        type:'bar',
-        data:{
-          labels,
-          datasets:['A','B','C'].map(g=>({
-            label:`Gruppo ${g}`, data:cnt[g],
-            backgroundColor:COL_ALPHA[g], borderColor:COL[g], borderWidth:1, borderRadius:5
-          }))
-        }, options: opts
-      });
+          datasets:['A','B','C'].map(g=>({ label:`Gruppo ${g}`, data:d.opzioni.map(op=>cnt[op][g]),
+            backgroundColor:COL_ALPHA[g], borderColor:COL[g], borderWidth:1, borderRadius:5 }))
+        }, options: barOpts });
+      } else if (d.tipo === 'numero') {
+        const FASCE=6, step=Math.ceil((d.max-d.min)/FASCE);
+        const labels = Array.from({length:FASCE},(_,i)=>{ const da=d.min+i*step,a=Math.min(da+step-1,d.max); return `${da}-${a}`; });
+        const getBucket = v => Math.min(Math.floor((parseInt(v)-d.min)/step),FASCE-1);
+        const cnt = { A:Array(FASCE).fill(0), B:Array(FASCE).fill(0), C:Array(FASCE).fill(0) };
+        dati.forEach(r => { if(cnt[r.gruppo]) cnt[r.gruppo][getBucket(r.valore)]++; });
+        chartAttivo = new Chart(ctx, { type:'bar', data:{ labels,
+          datasets:['A','B','C'].map(g=>({ label:`Gruppo ${g}`, data:cnt[g],
+            backgroundColor:COL_ALPHA[g], borderColor:COL[g], borderWidth:1, borderRadius:5 }))
+        }, options: barOpts });
+      }
     }
   }
 
@@ -343,30 +372,40 @@
       if (sub)  sub.textContent  = 'rispost' + (t===1?'a':'e');
     });
 
-    // Aggiorna dati del grafico esistente senza distruggerlo
     if (d.tipo === 'sinno') {
+      // Aggiorna le 3 torte
       const cnt = { A:{si:0,no:0}, B:{si:0,no:0}, C:{si:0,no:0} };
       dati.forEach(r => { if(cnt[r.gruppo]) cnt[r.gruppo][r.valore]++; });
-      chartAttivo.data.datasets[0].data = ['A','B','C'].map(g=>cnt[g].si);
-      chartAttivo.data.datasets[1].data = ['A','B','C'].map(g=>cnt[g].no);
+      if (Array.isArray(chartAttivo)) {
+        ['A','B','C'].forEach((g, i) => {
+          const ch = chartAttivo[i];
+          if (!ch) return;
+          const si = cnt[g].si, no = cnt[g].no, tot = si + no;
+          ch.data.datasets[0].data = tot > 0 ? [si,no] : [1,0];
+          ch.data.datasets[0].backgroundColor = tot > 0 ? ['#1DB87A','#E05A38'] : ['#2A2D3A','#2A2D3A'];
+          ch.update();
+          aggiornaPieLegend(g, si, no);
+        });
+      }
     } else if (d.tipo === 'scala') {
       const cnt = { A:{1:0,2:0,3:0,4:0,5:0}, B:{1:0,2:0,3:0,4:0,5:0}, C:{1:0,2:0,3:0,4:0,5:0} };
       dati.forEach(r => { const v=parseInt(r.valore); if(cnt[r.gruppo]&&cnt[r.gruppo][v]!==undefined) cnt[r.gruppo][v]++; });
       ['A','B','C'].forEach((g,i) => { chartAttivo.data.datasets[i].data = [1,2,3,4,5].map(v=>cnt[g][v]); });
+      chartAttivo.update();
     } else if (d.tipo === 'multipla') {
       const cnt = {};
       d.opzioni.forEach(op => { cnt[op]={A:0,B:0,C:0}; });
       dati.forEach(r => { if(cnt[r.valore]) cnt[r.valore][r.gruppo]++; });
       ['A','B','C'].forEach((g,i) => { chartAttivo.data.datasets[i].data = d.opzioni.map(op=>cnt[op][g]); });
+      chartAttivo.update();
     } else if (d.tipo === 'numero') {
-      const FASCE = 6;
-      const step  = Math.ceil((d.max - d.min) / FASCE);
-      const getBucket = v => Math.min(Math.floor((parseInt(v)-d.min)/step), FASCE-1);
+      const FASCE=6, step=Math.ceil((d.max-d.min)/FASCE);
+      const getBucket = v => Math.min(Math.floor((parseInt(v)-d.min)/step),FASCE-1);
       const cnt = { A:Array(FASCE).fill(0), B:Array(FASCE).fill(0), C:Array(FASCE).fill(0) };
       dati.forEach(r => { if(cnt[r.gruppo]) cnt[r.gruppo][getBucket(r.valore)]++; });
       ['A','B','C'].forEach((g,i) => { chartAttivo.data.datasets[i].data = cnt[g]; });
+      chartAttivo.update();
     }
-    chartAttivo.update('none'); // 'none' = aggiorna senza animazione
   }
 
   // ─── REALTIME ─────────────────────────────────────────────────────────────
