@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Questionario</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F7F5F0; --card: #FFFFFF; --text: #1A1916; --muted: #6B6860;
+    --border: #E2DED6; --accent: #2A5C8F; --accent-light: #EBF2FA;
+    --accent-text: #1A3D60; --yes: #1A6B4A; --yes-light: #E8F5EF;
+    --no: #9B3B1E; --no-light: #FAEDEA; --radius: 16px; --radius-sm: 10px;
+  }
+  body {
+    font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text);
+    min-height: 100vh; display: flex; align-items: flex-start;
+    justify-content: center; padding: 2rem 1rem 3rem;
+  }
+  .container { width: 100%; max-width: 440px; }
+  .logo {
+    text-align: center; margin-bottom: 2rem;
+    font-family: 'DM Serif Display', serif; font-size: 1.4rem;
+    color: var(--muted); letter-spacing: -0.01em;
+  }
+  .card {
+    background: var(--card); border-radius: var(--radius);
+    border: 1px solid var(--border); padding: 2rem 1.5rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  .step-indicator { display: flex; gap: 6px; margin-bottom: 1.75rem; }
+  .step-dot { height: 3px; border-radius: 2px; flex: 1; background: var(--border); transition: background .3s; }
+  .step-dot.active { background: var(--accent); }
+  .step-dot.done { background: var(--accent); opacity: 0.4; }
+  .question {
+    font-family: 'DM Serif Display', serif; font-size: 1.35rem;
+    line-height: 1.3; margin-bottom: 0.5rem; color: var(--text);
+  }
+  .subtitle { font-size: 0.875rem; color: var(--muted); margin-bottom: 1.75rem; }
+  .options-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.75rem; }
+  .option-btn {
+    width: 100%; padding: 1rem 1.25rem; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border); background: var(--card); color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 500;
+    cursor: pointer; text-align: left; display: flex; align-items: center;
+    gap: 12px; transition: all .2s; -webkit-tap-highlight-color: transparent;
+  }
+  .option-btn:active { transform: scale(0.98); }
+  .option-btn.selected { border-color: var(--accent); background: var(--accent-light); color: var(--accent-text); }
+  .option-letter {
+    width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid currentColor;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 0.9rem; flex-shrink: 0; opacity: 0.6; transition: all .2s;
+  }
+  .option-btn.selected .option-letter { background: var(--accent); border-color: var(--accent); color: #fff; opacity: 1; }
+  .yn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.75rem; }
+  .yn-btn {
+    padding: 1.25rem 1rem; border-radius: var(--radius-sm); border: 1.5px solid var(--border);
+    background: var(--card); color: var(--text); font-family: 'DM Sans', sans-serif;
+    font-size: 1.1rem; font-weight: 600; cursor: pointer; text-align: center;
+    transition: all .2s; -webkit-tap-highlight-color: transparent;
+  }
+  .yn-btn:active { transform: scale(0.97); }
+  .yn-btn.yes { border-color: var(--yes); background: var(--yes-light); color: var(--yes); }
+  .yn-btn.no { border-color: var(--no); background: var(--no-light); color: var(--no); }
+  .yn-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .primary-btn {
+    width: 100%; padding: 1rem; border-radius: var(--radius-sm); border: none;
+    background: var(--accent); color: #fff; font-family: 'DM Sans', sans-serif;
+    font-size: 1rem; font-weight: 600; cursor: pointer; transition: all .2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .primary-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .primary-btn:not(:disabled):active { transform: scale(0.98); }
+  .back-btn {
+    width: 100%; padding: 0.75rem; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: transparent; color: var(--muted);
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; cursor: pointer; margin-top: 10px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .success-icon {
+    width: 64px; height: 64px; border-radius: 50%; background: var(--yes-light);
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem;
+  }
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    background: var(--accent-light); color: var(--accent-text);
+    font-size: 0.8rem; font-weight: 500; margin-bottom: 1rem;
+  }
+  .error-msg {
+    color: var(--no); font-size: 0.875rem; text-align: center; padding: 0.75rem;
+    background: var(--no-light); border-radius: var(--radius-sm); margin-top: 12px;
+  }
+  .spinner {
+    display: inline-block; width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff;
+    border-radius: 50%; animation: spin .7s linear infinite;
+    margin-right: 8px; vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="logo">Sondaggio</div>
+  <div class="card" id="app"></div>
+</div>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+  const SUPABASE_URL  = 'https://jjqcivyfvjunmpxbjkne.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqcWNpdnlmdmp1bm1weGJqa25lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMjYyNjMsImV4cCI6MjA5MjkwMjI2M30.LFZLV9PzIKH2mPKdg-POY2LPtIVwaT-MVHnYa7V2hhs';
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  // ── Personalizza qui ──
+  const QUESTION_PAGE1 = "Quale opzione preferisci?";
+  const OPTIONS = {
+    A: "Opzione A — [descrivi]",
+    B: "Opzione B — [descrivi]",
+    C: "Opzione C — [descrivi]"
+  };
+  const QUESTION_PAGE2 = "[Inserisci la tua domanda Sì/No qui]";
+
+  let page = 1;
+  let choice = null;
+  const app = document.getElementById('app');
+
+  function renderPage1() {
+    page = 1;
+    app.innerHTML = `
+      <div class="step-indicator">
+        <div class="step-dot active"></div>
+        <div class="step-dot"></div>
+      </div>
+      <p class="question">${QUESTION_PAGE1}</p>
+      <p class="subtitle">Seleziona una risposta per continuare</p>
+      <div class="options-grid">
+        ${Object.entries(OPTIONS).map(([k,v]) => `
+          <button class="option-btn" id="opt-${k}" onclick="selectOpt('${k}')">
+            <span class="option-letter">${k}</span>
+            <span>${v}</span>
+          </button>`).join('')}
+      </div>
+      <button class="primary-btn" id="next-btn" onclick="goPage2()" disabled>Avanti →</button>
+    `;
+    if (choice) selectOpt(choice, false);
+  }
+
+  window.selectOpt = function(opt, update = true) {
+    if (update) choice = opt;
+    Object.keys(OPTIONS).forEach(k =>
+      document.getElementById('opt-'+k)?.classList.toggle('selected', k === choice)
+    );
+    const nb = document.getElementById('next-btn');
+    if (nb) nb.disabled = false;
+  };
+
+  window.goPage2 = function() {
+    if (!choice) return;
+    app.innerHTML = `
+      <div class="step-indicator">
+        <div class="step-dot done"></div>
+        <div class="step-dot active"></div>
+      </div>
+      <div class="badge">Opzione ${choice} selezionata</div>
+      <p class="question">${QUESTION_PAGE2}</p>
+      <p class="subtitle">Scegli una risposta</p>
+      <div class="yn-grid">
+        <button class="yn-btn yes" id="btn-si" onclick="submitAnswer('si')">Sì</button>
+        <button class="yn-btn no"  id="btn-no" onclick="submitAnswer('no')">No</button>
+      </div>
+      <button class="back-btn" onclick="renderPage1()">← Torna indietro</button>
+    `;
+  };
+
+  window.renderPage1 = renderPage1;
+
+  window.submitAnswer = async function(answer) {
+    document.getElementById('btn-si').disabled = true;
+    document.getElementById('btn-no').disabled = true;
+    const btn = document.getElementById('btn-' + answer);
+    btn.innerHTML = '<span class="spinner"></span>';
+
+    const col = `${choice.toLowerCase()}_${answer}`;
+
+    const { data, error } = await supabase.rpc('increment_vote', { col_name: col });
+
+    if (error) {
+      // fallback: read then update
+      const { data: row } = await supabase
+        .from('risultati').select(col).eq('id','sondaggio').single();
+      const current = row ? row[col] : 0;
+      await supabase.from('risultati')
+        .update({ [col]: current + 1 })
+        .eq('id', 'sondaggio');
+    }
+
+    app.innerHTML = `
+      <div style="text-align:center;padding:1rem 0 0.5rem">
+        <div class="success-icon">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+            stroke="#1A6B4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <p style="font-family:'DM Serif Display',serif;font-size:1.4rem;margin-bottom:0.5rem">Grazie!</p>
+        <p style="color:var(--muted);font-size:0.9rem;margin-bottom:1.75rem">La tua risposta è stata registrata.</p>
+        <button class="primary-btn" onclick="newForm()" style="max-width:240px;margin:0 auto">Compila di nuovo</button>
+      </div>
+    `;
+  };
+
+  window.newForm = function() { choice = null; renderPage1(); };
+
+  renderPage1();
+</script>
+</body>
+</html>

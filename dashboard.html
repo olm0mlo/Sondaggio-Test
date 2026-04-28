@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Risultati in diretta</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0F1117; --card: #1A1D26; --border: #2A2D3A;
+    --text: #F0EDE8; --muted: #7A7D8E; --radius: 20px;
+  }
+  body {
+    font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text);
+    min-height: 100vh; display: flex; flex-direction: column; padding: 2.5rem 3rem;
+  }
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2.5rem; }
+  .title { font-family: 'DM Serif Display', serif; font-size: 2rem; letter-spacing: -0.02em; }
+  .live-badge {
+    display: flex; align-items: center; gap: 8px; padding: 6px 14px;
+    border-radius: 20px; border: 1px solid var(--border); font-size: 0.85rem; color: var(--muted);
+  }
+  .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #1DB87A; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.85)} }
+  .grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; flex: 1; }
+  .card {
+    background: var(--card); border-radius: var(--radius); border: 1px solid var(--border);
+    padding: 2rem 1.75rem; display: flex; flex-direction: column; align-items: center;
+  }
+  .opt-title { font-family: 'DM Serif Display', serif; font-size: 1.6rem; margin-bottom: .25rem; }
+  .opt-count { font-size: .875rem; color: var(--muted); margin-bottom: 1.5rem; }
+  .chart-wrap { position: relative; width: 200px; height: 200px; margin-bottom: 1.5rem; }
+  .chart-center {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; pointer-events: none;
+  }
+  .chart-total { font-size: 2.2rem; font-weight: 600; line-height: 1; }
+  .chart-lbl { font-size: .75rem; color: var(--muted); margin-top: 2px; }
+  .legend { display: flex; gap: 20px; justify-content: center; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: .9rem; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+  .legend-val { font-weight: 600; font-size: 1.05rem; }
+  .legend-pct { color: var(--muted); font-size: .8rem; }
+  .footer { margin-top: 1.5rem; display: flex; justify-content: space-between; font-size: .8rem; color: var(--muted); }
+  .reset-btn {
+    padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); font-size: .8rem; cursor: pointer; transition: all .2s;
+  }
+  .reset-btn:hover { border-color: #E05A38; color: #E05A38; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="title">Risultati in diretta</div>
+    <div style="font-size:.9rem;color:var(--muted);margin-top:4px" id="total-label">In attesa di risposte...</div>
+  </div>
+  <div class="live-badge">
+    <div class="live-dot"></div>
+    <span id="last-update">Live</span>
+  </div>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<div class="footer">
+  <span>Aggiornamento in tempo reale</span>
+  <button class="reset-btn" onclick="resetData()">↺ Azzera dati</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+  const SUPABASE_URL  = 'https://jjqcivyfvjunmpxbjkne.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqcWNpdnlmdmp1bm1weGJqa25lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMjYyNjMsImV4cCI6MjA5MjkwMjI2M30.LFZLV9PzIKH2mPKdg-POY2LPtIVwaT-MVHnYa7V2hhs';
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  const COLORS = {
+    A: { yes: '#1DB87A', no: '#E05A38' },
+    B: { yes: '#4A9EE8', no: '#E8A020' },
+    C: { yes: '#9B6BF0', no: '#E85480' }
+  };
+  const charts = {};
+
+  function buildCards() {
+    document.getElementById('grid').innerHTML = ['A','B','C'].map(opt => `
+      <div class="card">
+        <div class="opt-title">Opzione ${opt}</div>
+        <div class="opt-count" id="count-${opt}">0 risposte</div>
+        <div class="chart-wrap">
+          <canvas id="chart-${opt}" width="200" height="200"></canvas>
+          <div class="chart-center">
+            <div class="chart-total" id="tot-${opt}">0</div>
+            <div class="chart-lbl">risposte</div>
+          </div>
+        </div>
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:${COLORS[opt].yes}"></div>
+            <span>Sì</span>
+            <span class="legend-val" id="si-v-${opt}">0</span>
+            <span class="legend-pct" id="si-p-${opt}">(0%)</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:${COLORS[opt].no}"></div>
+            <span>No</span>
+            <span class="legend-val" id="no-v-${opt}">0</span>
+            <span class="legend-pct" id="no-p-${opt}">(0%)</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    ['A','B','C'].forEach(opt => {
+      charts[opt] = new Chart(document.getElementById('chart-'+opt), {
+        type: 'doughnut',
+        data: {
+          labels: ['Sì','No'],
+          datasets: [{
+            data: [0,0],
+            backgroundColor: [COLORS[opt].yes, COLORS[opt].no],
+            borderWidth: 3, borderColor: '#1A1D26', hoverOffset: 6
+          }]
+        },
+        options: {
+          responsive: false, cutout: '68%',
+          animation: { duration: 700, easing: 'easeInOutQuart' },
+          plugins: { legend: { display: false } }
+        }
+      });
+    });
+  }
+
+  function updateCharts(row) {
+    let grand = 0;
+    ['A','B','C'].forEach(opt => {
+      const si = row[`${opt.toLowerCase()}_si`] || 0;
+      const no = row[`${opt.toLowerCase()}_no`] || 0;
+      const total = si + no;
+      grand += total;
+
+      const ch = charts[opt];
+      ch.data.datasets[0].data = total > 0 ? [si,no] : [1,0];
+      ch.data.datasets[0].backgroundColor = total > 0
+        ? [COLORS[opt].yes, COLORS[opt].no] : ['#2A2D3A','#2A2D3A'];
+      ch.update();
+
+      const siP = total > 0 ? Math.round(si/total*100) : 0;
+      document.getElementById('count-'+opt).textContent = total + ' rispost' + (total===1?'a':'e');
+      document.getElementById('tot-'+opt).textContent = total;
+      document.getElementById('si-v-'+opt).textContent = si;
+      document.getElementById('si-p-'+opt).textContent = '('+siP+'%)';
+      document.getElementById('no-v-'+opt).textContent = no;
+      document.getElementById('no-p-'+opt).textContent = '('+(total>0?100-siP:0)+'%)';
+    });
+
+    document.getElementById('total-label').textContent =
+      grand === 0 ? 'In attesa di risposte...' :
+      grand + ' rispost' + (grand===1?'a':'e') + ' totali';
+
+    const now = new Date();
+    document.getElementById('last-update').textContent =
+      'Aggiornato ' + now.toLocaleTimeString('it-IT');
+  }
+
+  async function loadData() {
+    const { data } = await supabase
+      .from('risultati').select('*').eq('id','sondaggio').single();
+    if (data) updateCharts(data);
+  }
+
+  // Realtime subscription
+  function subscribeRealtime() {
+    supabase.channel('risultati-changes')
+      .on('postgres_changes', {
+        event: 'UPDATE', schema: 'public', table: 'risultati'
+      }, payload => updateCharts(payload.new))
+      .subscribe();
+  }
+
+  window.resetData = async function() {
+    if (!confirm('Sei sicuro di voler azzerare tutti i dati?')) return;
+    await supabase.from('risultati').update({
+      a_si:0, a_no:0, b_si:0, b_no:0, c_si:0, c_no:0
+    }).eq('id','sondaggio');
+  };
+
+  buildCards();
+  loadData();
+  subscribeRealtime();
+</script>
+</body>
+</html>
