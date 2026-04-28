@@ -9,9 +9,12 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
     --bg: #F7F5F0; --card: #FFFFFF; --text: #1A1916; --muted: #6B6860;
-    --border: #E2DED6; --accent: #2A5C8F; --accent-light: #EBF2FA;
-    --accent-text: #1A3D60; --yes: #1A6B4A; --yes-light: #E8F5EF;
-    --no: #9B3B1E; --no-light: #FAEDEA; --radius: 16px; --radius-sm: 10px;
+    --border: #E2DED6; --radius: 16px; --radius-sm: 10px;
+    --yes: #1A6B4A; --yes-light: #E8F5EF;
+    --no: #9B3B1E; --no-light: #FAEDEA;
+    --A: #EF9F27; --A-light: #FAEEDA; --A-text: #633806;
+    --B: #7F77DD; --B-light: #EEEDFE; --B-text: #3C3489;
+    --C: #1D9E75; --C-light: #E1F5EE; --C-text: #085041;
   }
   body {
     font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text);
@@ -47,13 +50,17 @@
     gap: 12px; transition: all .2s; -webkit-tap-highlight-color: transparent;
   }
   .option-btn:active { transform: scale(0.98); }
-  .option-btn.selected { border-color: var(--accent); background: var(--accent-light); color: var(--accent-text); }
+  .option-btn.selected-A { border-color: var(--A); background: var(--A-light); color: var(--A-text); }
+  .option-btn.selected-B { border-color: var(--B); background: var(--B-light); color: var(--B-text); }
+  .option-btn.selected-C { border-color: var(--C); background: var(--C-light); color: var(--C-text); }
   .option-letter {
     width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid currentColor;
     display: flex; align-items: center; justify-content: center;
     font-weight: 600; font-size: 0.9rem; flex-shrink: 0; opacity: 0.6; transition: all .2s;
   }
-  .option-btn.selected .option-letter { background: var(--accent); border-color: var(--accent); color: #fff; opacity: 1; }
+  .option-btn.selected-A .option-letter { background: var(--A); border-color: var(--A); color: #fff; opacity: 1; }
+  .option-btn.selected-B .option-letter { background: var(--B); border-color: var(--B); color: #fff; opacity: 1; }
+  .option-btn.selected-C .option-letter { background: var(--C); border-color: var(--C); color: #fff; opacity: 1; }
   .yn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.75rem; }
   .yn-btn {
     padding: 1.25rem 1rem; border-radius: var(--radius-sm); border: 1.5px solid var(--border);
@@ -83,11 +90,9 @@
     width: 64px; height: 64px; border-radius: 50%; background: var(--yes-light);
     display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem;
   }
-  .badge {
-    display: inline-block; padding: 3px 10px; border-radius: 20px;
-    background: var(--accent-light); color: var(--accent-text);
-    font-size: 0.8rem; font-weight: 500; margin-bottom: 1rem;
-  }
+  .badge-A { display: inline-block; padding: 3px 10px; border-radius: 20px; background: var(--A-light); color: var(--A-text); font-size: 0.8rem; font-weight: 500; margin-bottom: 1rem; }
+  .badge-B { display: inline-block; padding: 3px 10px; border-radius: 20px; background: var(--B-light); color: var(--B-text); font-size: 0.8rem; font-weight: 500; margin-bottom: 1rem; }
+  .badge-C { display: inline-block; padding: 3px 10px; border-radius: 20px; background: var(--C-light); color: var(--C-text); font-size: 0.8rem; font-weight: 500; margin-bottom: 1rem; }
   .error-msg {
     color: var(--no); font-size: 0.875rem; text-align: center; padding: 0.75rem;
     background: var(--no-light); border-radius: var(--radius-sm); margin-top: 12px;
@@ -179,9 +184,12 @@
 
   window.selectOpt = function(opt, update = true) {
     if (update) choice = opt;
-    Object.keys(OPTIONS).forEach(k =>
-      document.getElementById('opt-'+k)?.classList.toggle('selected', k === choice)
-    );
+    Object.keys(OPTIONS).forEach(k => {
+      const btn = document.getElementById('opt-'+k);
+      if (!btn) return;
+      btn.classList.remove('selected-A','selected-B','selected-C');
+      if (k === choice) btn.classList.add('selected-'+k);
+    });
     const nb = document.getElementById('next-btn');
     if (nb) nb.disabled = false;
   };
@@ -193,7 +201,7 @@
         <div class="step-dot done"></div>
         <div class="step-dot active"></div>
       </div>
-      <div class="badge">Opzione ${choice} selezionata</div>
+      <div class="badge-${choice}">Opzione ${choice} selezionata</div>
       <p class="question">${QUESTION_PAGE2}</p>
       <p class="subtitle">Scegli una risposta</p>
       <div class="yn-grid">

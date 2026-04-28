@@ -79,17 +79,19 @@
 
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-  const COLORS = {
-    A: { yes: '#1DB87A', no: '#E05A38' },
-    B: { yes: '#4A9EE8', no: '#E8A020' },
-    C: { yes: '#9B6BF0', no: '#E85480' }
+  const OPT_COLORS = {
+    A: { main: '#EF9F27', light: 'rgba(239,159,39,0.15)', border: 'rgba(239,159,39,0.4)' },
+    B: { main: '#7F77DD', light: 'rgba(127,119,221,0.15)', border: 'rgba(127,119,221,0.4)' },
+    C: { main: '#1D9E75', light: 'rgba(29,158,117,0.15)', border: 'rgba(29,158,117,0.4)' },
   };
+  const YES_COLOR = '#1DB87A';
+  const NO_COLOR  = '#E05A38';
   const charts = {};
 
   function buildCards() {
     document.getElementById('grid').innerHTML = ['A','B','C'].map(opt => `
-      <div class="card">
-        <div class="opt-title">Opzione ${opt}</div>
+      <div class="card" style="border-color:${OPT_COLORS[opt].border};border-width:1.5px;">
+        <div class="opt-title" style="color:${OPT_COLORS[opt].main}">Opzione ${opt}</div>
         <div class="opt-count" id="count-${opt}">0 risposte</div>
         <div class="chart-wrap">
           <canvas id="chart-${opt}" width="200" height="200"></canvas>
@@ -100,13 +102,13 @@
         </div>
         <div class="legend">
           <div class="legend-item">
-            <div class="legend-dot" style="background:${COLORS[opt].yes}"></div>
+            <div class="legend-dot" style="background:${YES_COLOR}"></div>
             <span>Sì</span>
             <span class="legend-val" id="si-v-${opt}">0</span>
             <span class="legend-pct" id="si-p-${opt}">(0%)</span>
           </div>
           <div class="legend-item">
-            <div class="legend-dot" style="background:${COLORS[opt].no}"></div>
+            <div class="legend-dot" style="background:${NO_COLOR}"></div>
             <span>No</span>
             <span class="legend-val" id="no-v-${opt}">0</span>
             <span class="legend-pct" id="no-p-${opt}">(0%)</span>
@@ -122,7 +124,7 @@
           labels: ['Sì','No'],
           datasets: [{
             data: [0,0],
-            backgroundColor: [COLORS[opt].yes, COLORS[opt].no],
+            backgroundColor: [YES_COLOR, NO_COLOR],
             borderWidth: 3, borderColor: '#1A1D26', hoverOffset: 6
           }]
         },
@@ -146,7 +148,7 @@
       const ch = charts[opt];
       ch.data.datasets[0].data = total > 0 ? [si,no] : [1,0];
       ch.data.datasets[0].backgroundColor = total > 0
-        ? [COLORS[opt].yes, COLORS[opt].no] : ['#2A2D3A','#2A2D3A'];
+        ? [YES_COLOR, NO_COLOR] : ['#2A2D3A','#2A2D3A'];
       ch.update();
 
       const siP = total > 0 ? Math.round(si/total*100) : 0;
