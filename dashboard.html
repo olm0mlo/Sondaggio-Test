@@ -14,7 +14,6 @@
     --yes: #1DB87A; --no: #E05A38;
   }
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
-  /* SIDEBAR */
   .sidebar { width: 250px; flex-shrink: 0; background: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 1.5rem 1.25rem; gap: 1rem; }
   .sidebar-title { font-family: 'DM Serif Display', serif; font-size: 1.15rem; }
   .sidebar-sub { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
@@ -33,26 +32,26 @@
   .ctrl-next { background: var(--text); color: var(--bg); margin-bottom: 8px; }
   .ctrl-next:hover:not(:disabled) { opacity: 0.85; }
   .ctrl-next:disabled { opacity: 0.3; cursor: not-allowed; }
+  .ctrl-fine { background: var(--yes); color: #fff; margin-bottom: 8px; }
+  .ctrl-fine:hover:not(:disabled) { opacity: 0.85; }
+  .ctrl-fine:disabled { opacity: 0.3; cursor: not-allowed; }
   .ctrl-reset { background: transparent; color: var(--muted); border: 1px solid var(--border); font-size: 0.8rem; }
   .ctrl-reset:hover { border-color: var(--no); color: var(--no); }
-  /* MAIN */
   .main { flex: 1; display: flex; flex-direction: column; padding: 1.75rem 2.25rem; min-width: 0; }
   .main-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
   .main-title { font-family: 'DM Serif Display', serif; font-size: 1.5rem; line-height: 1.3; }
   .main-meta { font-size: 0.8rem; color: var(--muted); margin-top: 5px; }
   .qr-wrap { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; flex-shrink: 0; }
   .qr-label { font-size: 0.65rem; color: var(--muted); }
-  /* STAT ROW */
   .stat-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 1rem; }
   .stat-card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 0.9rem 1.1rem; }
   .stat-lbl { font-size: 0.7rem; color: var(--muted); margin-bottom: 3px; }
   .stat-val { font-size: 1.5rem; font-weight: 600; }
   .stat-sub { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
-  /* CHART */
   .chart-card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 1.25rem 1.5rem; flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; }
   .chart-card canvas { max-height: 300px; width: 100% !important; }
-  /* WAITING */
   .waiting-state { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 0.75rem; color: var(--muted); font-size: 0.95rem; }
+  .completed-state { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 0.75rem; color: var(--yes); font-size: 1rem; font-weight: 500; }
 </style>
 </head>
 <body>
@@ -69,6 +68,7 @@
     <span id="risposte-count">0 risposte totali</span>
   </div>
   <button class="ctrl-btn ctrl-next" id="next-btn" onclick="avanzaDomanda()">&#9654; Avvia evento</button>
+  <button class="ctrl-btn ctrl-fine" id="fine-btn" onclick="completaEvento()" style="display:none">&#10003; Evento completato</button>
   <button class="ctrl-btn ctrl-reset" onclick="resetEvento()">&#8635; Azzera tutto</button>
 </div>
 
@@ -108,15 +108,15 @@
     { tipo: 'scala',    testo: 'Quanto sei soddisfatto di questa esperienza finora?' }
   ];
   const TIPO_LABEL = { sinno: 'Si / No', numero: 'Numero', multipla: 'Scelta multipla', scala: 'Scala 1-5' };
-  const COL = { A: '#EF9F27', B: '#7F77DD', C: '#1D9E75' };
+  const COL       = { A: '#EF9F27', B: '#7F77DD', C: '#1D9E75' };
   const COL_ALPHA = { A: 'rgba(239,159,39,0.75)', B: 'rgba(127,119,221,0.75)', C: 'rgba(29,158,117,0.75)' };
+  const FINE = DOMANDE.length + 1; // valore speciale per "evento completato"
 
   let domandaAttiva = 0;
-  let domandaVista  = 0;   // quale domanda si sta visualizzando
-  let rispostePerDomanda = {}; // { 1: [...], 2: [...], ... }
+  let domandaVista  = 0;
+  let rispostePerDomanda = {};
   let chartAttivo = null;
 
-  // QR Code
   new QRCode(document.getElementById('qr-code'), {
     text: SURVEY_URL, width: 80, height: 80,
     colorDark: '#111111', colorLight: '#ffffff',
@@ -138,35 +138,46 @@
       </button>`;
     }).join('');
 
-    const btn = document.getElementById('next-btn');
-    const stato = document.getElementById('stato-label');
+    const nextBtn = document.getElementById('next-btn');
+    const fineBtn = document.getElementById('fine-btn');
+    const stato   = document.getElementById('stato-label');
+
     if (domandaAttiva === 0) {
-      btn.textContent = '\u25B6 Avvia evento';
-      btn.disabled = false;
+      nextBtn.textContent = '\u25B6 Avvia evento';
+      nextBtn.disabled = false;
+      nextBtn.style.display = 'block';
+      fineBtn.style.display = 'none';
       stato.textContent = 'Evento non ancora avviato';
-    } else if (domandaAttiva >= DOMANDE.length) {
-      btn.textContent = 'Evento completato';
-      btn.disabled = true;
-      stato.textContent = 'Tutte le domande completate';
+    } else if (domandaAttiva >= DOMANDE.length && domandaAttiva < FINE) {
+      // Ultima domanda attiva — mostra bottone "Evento completato"
+      nextBtn.style.display = 'none';
+      fineBtn.style.display = 'block';
+      fineBtn.disabled = false;
+      stato.textContent = `Domanda ${domandaAttiva} di ${DOMANDE.length} attiva`;
+    } else if (domandaAttiva >= FINE) {
+      // Evento concluso
+      nextBtn.style.display = 'none';
+      fineBtn.style.display = 'block';
+      fineBtn.disabled = true;
+      fineBtn.textContent = '\u2713 Evento concluso';
+      stato.textContent = 'Evento completato';
     } else {
-      btn.innerHTML = `&#9654; Domanda ${domandaAttiva + 1}`;
-      btn.disabled = false;
+      nextBtn.innerHTML = `&#9654; Domanda ${domandaAttiva + 1}`;
+      nextBtn.disabled = false;
+      nextBtn.style.display = 'block';
+      fineBtn.style.display = 'none';
       stato.textContent = `Domanda ${domandaAttiva} di ${DOMANDE.length} attiva`;
     }
   }
 
-  // ─── AVANZA ───────────────────────────────────────────────────────────────
+  // ─── AVANZA DOMANDA ───────────────────────────────────────────────────────
   window.avanzaDomanda = async function() {
     const nuova = domandaAttiva + 1;
     if (nuova > DOMANDE.length) return;
     document.getElementById('next-btn').disabled = true;
     const { error } = await supabase.from('stato_evento')
       .update({ domanda_attiva: nuova }).eq('id','evento');
-    if (error) {
-      alert('Errore di comunicazione. Riprova.');
-      document.getElementById('next-btn').disabled = false;
-      return;
-    }
+    if (error) { alert('Errore. Riprova.'); document.getElementById('next-btn').disabled = false; return; }
     domandaAttiva = nuova;
     domandaVista  = nuova;
     if (!rispostePerDomanda[nuova]) rispostePerDomanda[nuova] = [];
@@ -174,7 +185,26 @@
     renderContent(nuova);
   };
 
-  // ─── MOSTRA DOMANDA (click sidebar) ──────────────────────────────────────
+  // ─── COMPLETA EVENTO ──────────────────────────────────────────────────────
+  window.completaEvento = async function() {
+    if (!confirm('Vuoi segnare l\'evento come completato? I partecipanti vedranno il riepilogo delle loro risposte.')) return;
+    document.getElementById('fine-btn').disabled = true;
+    const { error } = await supabase.from('stato_evento')
+      .update({ domanda_attiva: FINE }).eq('id','evento');
+    if (error) { alert('Errore. Riprova.'); document.getElementById('fine-btn').disabled = false; return; }
+    domandaAttiva = FINE;
+    buildSidebar();
+    document.getElementById('main-title').textContent = 'Evento completato';
+    document.getElementById('main-meta').textContent  = 'I partecipanti stanno vedendo il riepilogo delle loro risposte';
+    document.getElementById('content-area').innerHTML = `
+      <div class="completed-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <p>Evento completato con successo</p>
+        <p style="font-size:0.8rem;color:var(--muted);font-weight:400">I partecipanti vedono ora il riepilogo sul loro smartphone</p>
+      </div>`;
+  };
+
+  // ─── MOSTRA DOMANDA ───────────────────────────────────────────────────────
   window.mostraDomanda = function(n) {
     if (n > domandaAttiva) return;
     domandaVista = n;
@@ -183,16 +213,21 @@
 
   // ─── RENDER CONTENT ───────────────────────────────────────────────────────
   function renderContent(n) {
-    const d = DOMANDE[n - 1];
+    if (n < 1 || n > DOMANDE.length) return;
+    const d    = DOMANDE[n - 1];
     const dati = rispostePerDomanda[n] || [];
 
     document.getElementById('main-title').textContent = d.testo;
-    document.getElementById('main-meta').textContent =
+    document.getElementById('main-meta').textContent  =
       `Domanda ${n} di ${DOMANDE.length} — ${TIPO_LABEL[d.tipo]}`;
 
     const totA = dati.filter(r => r.gruppo==='A').length;
     const totB = dati.filter(r => r.gruppo==='B').length;
     const totC = dati.filter(r => r.gruppo==='C').length;
+    const tot  = totA + totB + totC;
+
+    document.getElementById('risposte-count').textContent =
+      `${tot} rispost${tot===1?'a':'e'} — dom. ${n}`;
 
     const statsHtml = `<div class="stat-row">
       ${[['A',totA],['B',totB],['C',totC]].map(([g,t]) => `
@@ -207,7 +242,7 @@
       statsHtml + `<div class="chart-card"><canvas id="chart-main"></canvas></div>`;
 
     if (chartAttivo) { chartAttivo.destroy(); chartAttivo = null; }
-    setTimeout(() => { buildChart(d, dati); }, 30);
+    setTimeout(() => buildChart(d, dati), 30);
   }
 
   // ─── BUILD CHART ──────────────────────────────────────────────────────────
@@ -216,8 +251,7 @@
     if (!ctx) return;
 
     const opts = {
-      responsive: true,
-      maintainAspectRatio: true,
+      responsive: true, maintainAspectRatio: true,
       animation: { duration: 400 },
       plugins: {
         legend: { labels: { color: '#F0EDE8', font: { family:'DM Sans', size:12 }, padding: 16 } },
@@ -240,52 +274,41 @@
             { label:'Si',  data:['A','B','C'].map(g=>cnt[g].si), backgroundColor:'#1DB87A', borderRadius:5 },
             { label:'No', data:['A','B','C'].map(g=>cnt[g].no), backgroundColor:'#E05A38', borderRadius:5 }
           ]
-        },
-        options:{...opts, plugins:{...opts.plugins, title:{display:true,text:'Risposte Si / No per gruppo',color:'#7A7D8E',font:{family:'DM Sans',size:12,weight:'400'}}}}
+        }, options: opts
       });
-
     } else if (d.tipo === 'scala') {
-      const cnt = { A:{}, B:{}, C:{} };
-      [1,2,3,4,5].forEach(v => { cnt.A[v]=0; cnt.B[v]=0; cnt.C[v]=0; });
+      const cnt = { A:{1:0,2:0,3:0,4:0,5:0}, B:{1:0,2:0,3:0,4:0,5:0}, C:{1:0,2:0,3:0,4:0,5:0} };
       dati.forEach(r => { const v=parseInt(r.valore); if(cnt[r.gruppo]&&cnt[r.gruppo][v]!==undefined) cnt[r.gruppo][v]++; });
       chartAttivo = new Chart(ctx, {
         type:'bar',
         data:{
           labels:['1','2','3','4','5'],
           datasets:['A','B','C'].map(g=>({
-            label:`Gruppo ${g}`,
-            data:[1,2,3,4,5].map(v=>cnt[g][v]),
+            label:`Gruppo ${g}`, data:[1,2,3,4,5].map(v=>cnt[g][v]),
             backgroundColor:COL_ALPHA[g], borderColor:COL[g], borderWidth:1, borderRadius:5
           }))
-        },
-        options:{...opts, plugins:{...opts.plugins, title:{display:true,text:'Distribuzione scala 1-5 per gruppo',color:'#7A7D8E',font:{family:'DM Sans',size:12,weight:'400'}}}}
+        }, options: opts
       });
-
     } else if (d.tipo === 'multipla') {
       const cnt = {};
       d.opzioni.forEach(op => { cnt[op]={A:0,B:0,C:0}; });
       dati.forEach(r => { if(cnt[r.valore]) cnt[r.valore][r.gruppo]++; });
-      const labelsShort = d.opzioni.map(op => op.length>22 ? op.substring(0,22)+'...' : op);
       chartAttivo = new Chart(ctx, {
         type:'bar',
         data:{
-          labels:labelsShort,
+          labels: d.opzioni.map(op => op.length>22 ? op.substring(0,22)+'...' : op),
           datasets:['A','B','C'].map(g=>({
-            label:`Gruppo ${g}`,
-            data:d.opzioni.map(op=>cnt[op][g]),
+            label:`Gruppo ${g}`, data:d.opzioni.map(op=>cnt[op][g]),
             backgroundColor:COL_ALPHA[g], borderColor:COL[g], borderWidth:1, borderRadius:5
           }))
-        },
-        options:{...opts, plugins:{...opts.plugins, title:{display:true,text:'Risposte per opzione e gruppo',color:'#7A7D8E',font:{family:'DM Sans',size:12,weight:'400'}}}}
+        }, options: opts
       });
-
     } else if (d.tipo === 'numero') {
       const FASCE = 6;
       const step  = Math.ceil((d.max - d.min) / FASCE);
-      const labels = Array.from({length:FASCE}, (_,i)=>{
-        const da = d.min + i*step;
-        const a  = Math.min(da+step-1, d.max);
-        return `${da}–${a}`;
+      const labels = Array.from({length:FASCE}, (_,i) => {
+        const da = d.min + i*step, a = Math.min(da+step-1, d.max);
+        return `${da}-${a}`;
       });
       const getBucket = v => Math.min(Math.floor((parseInt(v)-d.min)/step), FASCE-1);
       const cnt = { A:Array(FASCE).fill(0), B:Array(FASCE).fill(0), C:Array(FASCE).fill(0) };
@@ -295,32 +318,22 @@
         data:{
           labels,
           datasets:['A','B','C'].map(g=>({
-            label:`Gruppo ${g}`,
-            data:cnt[g],
+            label:`Gruppo ${g}`, data:cnt[g],
             backgroundColor:COL_ALPHA[g], borderColor:COL[g], borderWidth:1, borderRadius:5
           }))
-        },
-        options:{...opts, plugins:{...opts.plugins, title:{display:true,text:'Distribuzione valori numerici per gruppo',color:'#7A7D8E',font:{family:'DM Sans',size:12,weight:'400'}}}}
+        }, options: opts
       });
     }
   }
 
-  // ─── REALTIME RISPOSTE ────────────────────────────────────────────────────
+  // ─── REALTIME ─────────────────────────────────────────────────────────────
   function subscribeRisposte() {
     supabase.channel('dashboard-risposte')
-      .on('postgres_changes', {
-        event: 'INSERT', schema: 'public', table: 'risposte'
-      }, payload => {
+      .on('postgres_changes', { event:'INSERT', schema:'public', table:'risposte' }, payload => {
         const r = payload.new;
         if (!rispostePerDomanda[r.domanda]) rispostePerDomanda[r.domanda] = [];
         rispostePerDomanda[r.domanda].push(r);
-        // Aggiorna contatore totale
-        const tot = Object.values(rispostePerDomanda).reduce((s,arr)=>s+arr.length,0);
-        document.getElementById('risposte-count').textContent = `${tot} rispost${tot===1?'a':'e'} totali`;
-        // Aggiorna grafico solo se si sta guardando questa domanda
-        if (r.domanda === domandaVista) {
-          renderContent(domandaVista);
-        }
+        if (r.domanda === domandaVista) renderContent(domandaVista);
       })
       .subscribe();
   }
@@ -332,9 +345,7 @@
       supabase.rpc('reset_risposte'),
       supabase.from('stato_evento').update({ domanda_attiva: 0 }).eq('id','evento')
     ]);
-    domandaAttiva = 0;
-    domandaVista  = 0;
-    rispostePerDomanda = {};
+    domandaAttiva = 0; domandaVista = 0; rispostePerDomanda = {};
     if (chartAttivo) { chartAttivo.destroy(); chartAttivo = null; }
     buildSidebar();
     document.getElementById('main-title').textContent = "In attesa di avviare l'evento";
@@ -349,29 +360,33 @@
 
   // ─── INIT ─────────────────────────────────────────────────────────────────
   async function init() {
-    // Carica stato evento
     const { data: stato } = await supabase
       .from('stato_evento').select('domanda_attiva').eq('id','evento').single();
     if (stato) domandaAttiva = stato.domanda_attiva;
 
-    // Carica tutte le risposte esistenti
-    if (domandaAttiva > 0) {
-      const { data: tutte } = await supabase.from('risposte').select('gruppo,valore,domanda');
+    if (domandaAttiva > 0 && domandaAttiva < FINE) {
+      const { data: tutte } = await supabase.from('risposte').select('gruppo,valore,domanda,id_utente');
       if (tutte) {
         tutte.forEach(r => {
           if (!rispostePerDomanda[r.domanda]) rispostePerDomanda[r.domanda] = [];
           rispostePerDomanda[r.domanda].push(r);
         });
-        const tot = tutte.length;
-        document.getElementById('risposte-count').textContent = `${tot} rispost${tot===1?'a':'e'} totali`;
       }
     }
 
     buildSidebar();
 
-    if (domandaAttiva > 0) {
+    if (domandaAttiva > 0 && domandaAttiva < FINE) {
       domandaVista = domandaAttiva;
       renderContent(domandaAttiva);
+    } else if (domandaAttiva >= FINE) {
+      document.getElementById('main-title').textContent = 'Evento completato';
+      document.getElementById('main-meta').textContent  = 'I partecipanti stanno vedendo il riepilogo delle loro risposte';
+      document.getElementById('content-area').innerHTML = `
+        <div class="completed-state">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <p>Evento completato con successo</p>
+        </div>`;
     }
 
     subscribeRisposte();
