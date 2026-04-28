@@ -222,17 +222,7 @@
 
     const col = `${choice.toLowerCase()}_${answer}`;
 
-    const { data, error } = await supabase.rpc('increment_vote', { col_name: col });
-
-    if (error) {
-      // fallback: read then update
-      const { data: row } = await supabase
-        .from('risultati').select(col).eq('id','sondaggio').single();
-      const current = row ? row[col] : 0;
-      await supabase.from('risultati')
-        .update({ [col]: current + 1 })
-        .eq('id', 'sondaggio');
-    }
+    await supabase.rpc('increment_vote', { col_name: col });
 
     setCookie();
     app.innerHTML = `
