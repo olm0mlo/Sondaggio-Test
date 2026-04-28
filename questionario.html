@@ -22,26 +22,14 @@
     justify-content: center; padding: 2rem 1rem 3rem;
   }
   .container { width: 100%; max-width: 440px; }
-  .logo {
-    text-align: center; margin-bottom: 2rem;
-    font-family: 'DM Serif Display', serif; font-size: 1.4rem;
-    color: var(--muted); letter-spacing: -0.01em;
-  }
-  .card {
-    background: var(--card); border-radius: var(--radius);
-    border: 1px solid var(--border); padding: 2rem 1.5rem;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-  }
+  .logo { text-align: center; margin-bottom: 2rem; font-family: 'DM Serif Display', serif; font-size: 1.4rem; color: var(--muted); }
+  .card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 2rem 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
   .step-indicator { display: flex; gap: 6px; margin-bottom: 1.75rem; }
   .step-dot { height: 3px; border-radius: 2px; flex: 1; background: var(--border); transition: background .3s; }
   .step-dot.active { background: #1A1916; }
   .step-dot.done { background: #1A1916; opacity: 0.25; }
-  .question {
-    font-family: 'DM Serif Display', serif; font-size: 1.35rem;
-    line-height: 1.3; margin-bottom: 0.5rem;
-  }
+  .question { font-family: 'DM Serif Display', serif; font-size: 1.35rem; line-height: 1.3; margin-bottom: 0.5rem; }
   .subtitle { font-size: 0.875rem; color: var(--muted); margin-bottom: 1.75rem; }
-  /* Opzioni A/B/C iniziali */
   .options-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.75rem; }
   .option-btn {
     width: 100%; padding: 1rem 1.25rem; border-radius: var(--radius-sm);
@@ -51,102 +39,44 @@
     gap: 12px; transition: all .2s; -webkit-tap-highlight-color: transparent;
   }
   .option-btn:active { transform: scale(0.98); }
-  .option-letter {
-    width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid currentColor;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 600; font-size: 0.9rem; flex-shrink: 0; opacity: 0.6; transition: all .2s;
-  }
+  .option-letter { width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid currentColor; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.9rem; flex-shrink: 0; opacity: 0.6; transition: all .2s; }
   .option-btn.sel-A { border-color: var(--A); background: var(--A-light); color: var(--A-text); }
   .option-btn.sel-B { border-color: var(--B); background: var(--B-light); color: var(--B-text); }
   .option-btn.sel-C { border-color: var(--C); background: var(--C-light); color: var(--C-text); }
   .option-btn.sel-A .option-letter { background: var(--A); border-color: var(--A); color: #fff; opacity: 1; }
   .option-btn.sel-B .option-letter { background: var(--B); border-color: var(--B); color: #fff; opacity: 1; }
   .option-btn.sel-C .option-letter { background: var(--C); border-color: var(--C); color: #fff; opacity: 1; }
-  /* Sì/No */
   .yn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.75rem; }
-  .yn-btn {
-    padding: 1.25rem 1rem; border-radius: var(--radius-sm); border: 1.5px solid var(--border);
-    background: var(--card); color: var(--text); font-family: 'DM Sans', sans-serif;
-    font-size: 1.1rem; font-weight: 600; cursor: pointer; text-align: center;
-    transition: all .2s; -webkit-tap-highlight-color: transparent;
-  }
+  .yn-btn { padding: 1.25rem 1rem; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--card); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 1.1rem; font-weight: 600; cursor: pointer; text-align: center; transition: all .2s; -webkit-tap-highlight-color: transparent; }
   .yn-btn:active { transform: scale(0.97); }
   .yn-btn.yes { border-color: var(--yes); background: var(--yes-light); color: var(--yes); }
   .yn-btn.no  { border-color: var(--no);  background: var(--no-light);  color: var(--no); }
   .yn-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-  /* Scala 1-5 */
-  .scale-grid { display: flex; gap: 8px; margin-bottom: 1.75rem; }
-  .scale-btn {
-    flex: 1; padding: 1rem 0.5rem; border-radius: var(--radius-sm);
-    border: 1.5px solid var(--border); background: var(--card); color: var(--text);
-    font-family: 'DM Sans', sans-serif; font-size: 1.1rem; font-weight: 600;
-    cursor: pointer; text-align: center; transition: all .2s; -webkit-tap-highlight-color: transparent;
-  }
+  .scale-grid { display: flex; gap: 8px; margin-bottom: 0.5rem; }
+  .scale-btn { flex: 1; padding: 1rem 0.5rem; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--card); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 1.1rem; font-weight: 600; cursor: pointer; text-align: center; transition: all .2s; -webkit-tap-highlight-color: transparent; }
   .scale-btn:active { transform: scale(0.95); }
-  .scale-btn.selected { border-color: #7F77DD; background: #EEEDFE; color: #3C3489; }
-  .scale-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); margin-top: -1rem; margin-bottom: 1.75rem; }
-  /* Numero slider */
+  .scale-btn.selected { border-color: var(--B); background: var(--B-light); color: var(--B-text); }
+  .scale-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); margin-bottom: 1.75rem; }
   .slider-wrap { margin-bottom: 1.75rem; }
-  .slider-val {
-    text-align: center; font-family: 'DM Serif Display', serif;
-    font-size: 3rem; margin-bottom: 1rem; color: var(--text);
-  }
-  input[type=range] {
-    width: 100%; height: 6px; border-radius: 3px; appearance: none;
-    background: var(--border); outline: none; cursor: pointer;
-  }
-  input[type=range]::-webkit-slider-thumb {
-    appearance: none; width: 24px; height: 24px; border-radius: 50%;
-    background: #1A1916; cursor: pointer;
-  }
+  .slider-val { text-align: center; font-family: 'DM Serif Display', serif; font-size: 3rem; margin-bottom: 1rem; }
+  input[type=range] { width: 100%; height: 6px; border-radius: 3px; appearance: none; background: var(--border); outline: none; cursor: pointer; }
+  input[type=range]::-webkit-slider-thumb { appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #1A1916; cursor: pointer; }
   .slider-minmax { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); margin-top: 8px; }
-  /* Scelta multipla */
   .mc-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1.75rem; }
-  .mc-btn {
-    width: 100%; padding: 0.9rem 1.25rem; border-radius: var(--radius-sm);
-    border: 1.5px solid var(--border); background: var(--card); color: var(--text);
-    font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500;
-    cursor: pointer; text-align: left; transition: all .2s; -webkit-tap-highlight-color: transparent;
-  }
+  .mc-btn { width: 100%; padding: 0.9rem 1.25rem; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--card); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500; cursor: pointer; text-align: left; transition: all .2s; -webkit-tap-highlight-color: transparent; }
   .mc-btn:active { transform: scale(0.98); }
-  .mc-btn.selected { border-color: #1D9E75; background: #E1F5EE; color: #085041; }
-  /* Primary button */
-  .primary-btn {
-    width: 100%; padding: 1rem; border-radius: var(--radius-sm); border: none;
-    background: #1A1916; color: #FFFFFF; font-family: 'DM Sans', sans-serif;
-    font-size: 1rem; font-weight: 600; cursor: pointer; transition: all .2s;
-    -webkit-tap-highlight-color: transparent;
-  }
+  .mc-btn.selected { border-color: var(--C); background: var(--C-light); color: var(--C-text); }
+  .primary-btn { width: 100%; padding: 1rem; border-radius: var(--radius-sm); border: none; background: #1A1916; color: #FFFFFF; font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all .2s; -webkit-tap-highlight-color: transparent; }
   .primary-btn:disabled { opacity: 0.35; cursor: not-allowed; }
   .primary-btn:not(:disabled):active { transform: scale(0.98); }
-  .back-btn {
-    width: 100%; padding: 0.75rem; border-radius: var(--radius-sm);
-    border: 1px solid var(--border); background: transparent; color: var(--muted);
-    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; cursor: pointer; margin-top: 10px;
-    -webkit-tap-highlight-color: transparent;
-  }
   .badge-A { display:inline-block;padding:3px 10px;border-radius:20px;background:var(--A-light);color:var(--A-text);font-size:.8rem;font-weight:500;margin-bottom:1rem; }
   .badge-B { display:inline-block;padding:3px 10px;border-radius:20px;background:var(--B-light);color:var(--B-text);font-size:.8rem;font-weight:500;margin-bottom:1rem; }
   .badge-C { display:inline-block;padding:3px 10px;border-radius:20px;background:var(--C-light);color:var(--C-text);font-size:.8rem;font-weight:500;margin-bottom:1rem; }
-  .success-icon {
-    width: 64px; height: 64px; border-radius: 50%; background: var(--yes-light);
-    display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem;
-  }
-  .spinner {
-    display: inline-block; width: 18px; height: 18px;
-    border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff;
-    border-radius: 50%; animation: spin .7s linear infinite;
-    margin-right: 8px; vertical-align: middle;
-  }
+  .success-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--yes-light); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; }
+  .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; margin-right: 8px; vertical-align: middle; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .waiting {
-    text-align: center; padding: 2rem 0;
-  }
-  .waiting-dot {
-    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
-    background: var(--muted); margin: 0 3px;
-    animation: blink 1.4s infinite both;
-  }
+  .waiting { text-align: center; padding: 2rem 0; }
+  .waiting-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); margin: 0 3px; animation: blink 1.4s infinite both; }
   .waiting-dot:nth-child(2) { animation-delay: .2s; }
   .waiting-dot:nth-child(3) { animation-delay: .4s; }
   @keyframes blink { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
@@ -155,7 +85,7 @@
 <body>
 <div class="container">
   <div class="logo">Sondaggio</div>
-  <div class="card" id="app"></div>
+  <div class="card" id="app"><div class="waiting"><div><span class="waiting-dot"></span><span class="waiting-dot"></span><span class="waiting-dot"></span></div></div></div>
 </div>
 
 <script type="module">
@@ -165,77 +95,54 @@
   const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqcWNpdnlmdmp1bm1weGJqa25lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczMjYyNjMsImV4cCI6MjA5MjkwMjI2M30.LFZLV9PzIKH2mPKdg-POY2LPtIVwaT-MVHnYa7V2hhs';
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-  // ─── CONFIGURAZIONE DOMANDE ───────────────────────────────────────────────
-  // Modifica qui i testi delle domande prima dell'evento
   const DOMANDE = [
-    {
-      tipo: 'sinno',
-      testo: 'Hai mai partecipato a un evento simile in precedenza?',
-      sottotitolo: 'Scegli una risposta'
-    },
-    {
-      tipo: 'numero',
-      testo: 'Quante ore alla settimana dedichi a questa attivita?',
-      sottotitolo: 'Trascina il cursore',
-      min: 0, max: 60, default: 10
-    },
-    {
-      tipo: 'multipla',
-      testo: 'Quale aspetto trovi piu importante?',
-      sottotitolo: 'Seleziona una risposta',
-      opzioni: ['La qualita dei contenuti', 'Il networking', 'Le opportunita pratiche', 'La formazione teorica']
-    },
-    {
-      tipo: 'scala',
-      testo: 'Quanto sei soddisfatto di questa esperienza finora?',
-      sottotitolo: 'Valuta da 1 a 5',
-      labelMin: 'Per niente', labelMax: 'Moltissimo'
-    }
+    { tipo: 'sinno',    testo: 'Hai mai partecipato a un evento simile in precedenza?', sottotitolo: 'Scegli una risposta' },
+    { tipo: 'numero',   testo: 'Quante ore alla settimana dedichi a questa attivita?', sottotitolo: 'Trascina il cursore', min: 0, max: 60, default: 10 },
+    { tipo: 'multipla', testo: 'Quale aspetto trovi piu importante?', sottotitolo: 'Seleziona una risposta', opzioni: ['La qualita dei contenuti', 'Il networking', 'Le opportunita pratiche', 'La formazione teorica'] },
+    { tipo: 'scala',    testo: 'Quanto sei soddisfatto di questa esperienza finora?', sottotitolo: 'Valuta da 1 a 5', labelMin: 'Per niente', labelMax: 'Moltissimo' }
   ];
 
-  // ─── STATO ────────────────────────────────────────────────────────────────
-  const COOKIE_GRUPPO = 'sondaggio_gruppo';
-  const COOKIE_PREFIX = 'sondaggio_risposta_';
+  const COOKIE_GRUPPO  = 'sondaggio_gruppo';
+  const COOKIE_PREFIX  = 'sondaggio_r_';
 
   let gruppo = null;
   let domandaAttiva = 0;
   let rispostaCorrente = null;
   const app = document.getElementById('app');
 
-  // ─── COOKIE UTILS ─────────────────────────────────────────────────────────
-  function setCookie(name, value, hours = 24) {
+  // ─── COOKIE ───────────────────────────────────────────────────────────────
+  function setCookie(name, value, hours = 48) {
     const exp = new Date();
     exp.setHours(exp.getHours() + hours);
-    document.cookie = `${name}=${value}; expires=${exp.toUTCString()}; path=/`;
+    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${exp.toUTCString()}; path=/`;
   }
-
   function getCookie(name) {
     const found = document.cookie.split(';').find(c => c.trim().startsWith(name + '='));
-    return found ? found.trim().split('=')[1] : null;
+    return found ? decodeURIComponent(found.trim().split('=').slice(1).join('=')) : null;
   }
-
-  function haRisposto(numDomanda) {
-    return getCookie(COOKIE_PREFIX + numDomanda) === '1';
-  }
-
-  function segnaRisposto(numDomanda) {
-    setCookie(COOKIE_PREFIX + numDomanda, '1');
-  }
+  function haRisposto(n) { return getCookie(COOKIE_PREFIX + n) === '1'; }
+  function segnaRisposto(n) { setCookie(COOKIE_PREFIX + n, '1'); }
 
   // ─── STEP INDICATOR ───────────────────────────────────────────────────────
   function stepIndicator(attiva) {
-    const totalSteps = DOMANDE.length + 1; // +1 per scelta gruppo
-    return `<div class="step-indicator">
-      ${Array.from({length: totalSteps}, (_,i) => {
-        let cls = '';
-        if (i < attiva) cls = 'done';
-        else if (i === attiva) cls = 'active';
+    return `<div class="step-indicator">${
+      Array.from({length: DOMANDE.length + 1}, (_,i) => {
+        const cls = i < attiva ? 'done' : i === attiva ? 'active' : '';
         return `<div class="step-dot ${cls}"></div>`;
-      }).join('')}
-    </div>`;
+      }).join('')
+    }</div>`;
   }
 
-  // ─── PAGINA 0: SCELTA GRUPPO ──────────────────────────────────────────────
+  // ─── ROUTER ───────────────────────────────────────────────────────────────
+  function render() {
+    if (!gruppo) { renderSceltaGruppo(); return; }
+    if (domandaAttiva === 0) { renderAttesa("L'evento sta per iniziare..."); return; }
+    if (domandaAttiva > DOMANDE.length) { renderFine(); return; }
+    if (haRisposto(domandaAttiva)) { renderGiaRisposto(); return; }
+    renderDomanda(domandaAttiva);
+  }
+
+  // ─── SCELTA GRUPPO ────────────────────────────────────────────────────────
   function renderSceltaGruppo() {
     app.innerHTML = `
       ${stepIndicator(0)}
@@ -256,7 +163,7 @@
     gruppo = g;
     ['A','B','C'].forEach(k => {
       const b = document.getElementById('opt-'+k);
-      if (b) { b.className = 'option-btn' + (k === g ? ` sel-${g}` : ''); }
+      if (b) b.className = 'option-btn' + (k === g ? ' sel-'+g : '');
     });
     const nb = document.getElementById('next-btn');
     if (nb) nb.disabled = false;
@@ -265,251 +172,189 @@
   window.confermGruppo = function() {
     if (!gruppo) return;
     setCookie(COOKIE_GRUPPO, gruppo);
-    renderDomandaOAttesa(domandaAttiva);
+    render();
   };
 
-  // ─── ROUTER: DOMANDA O ATTESA ─────────────────────────────────────────────
-  function renderDomandaOAttesa(numDomanda) {
-    if (numDomanda === 0) {
-      renderAttesa(0);
-    } else if (numDomanda > DOMANDE.length) {
-      renderFine();
-    } else if (haRisposto(numDomanda)) {
-      renderGiaRisposto(numDomanda);
-    } else {
-      renderDomanda(numDomanda);
-    }
-  }
-
   // ─── ATTESA ───────────────────────────────────────────────────────────────
-  function renderAttesa(numDomanda) {
-    const msg = numDomanda === 0
-      ? "L'evento sta per iniziare..."
-      : `In attesa della domanda ${numDomanda + 1}...`;
+  function renderAttesa(msg) {
     app.innerHTML = `
       <div class="waiting">
         <p style="font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:1.5rem">${msg}</p>
-        <div>
-          <span class="waiting-dot"></span>
-          <span class="waiting-dot"></span>
-          <span class="waiting-dot"></span>
-        </div>
+        <div><span class="waiting-dot"></span><span class="waiting-dot"></span><span class="waiting-dot"></span></div>
         <p style="font-size:0.8rem;color:var(--muted);margin-top:1.5rem">La pagina si aggiorna automaticamente</p>
-      </div>
-    `;
+      </div>`;
   }
 
   // ─── GIA' RISPOSTO ────────────────────────────────────────────────────────
-  function renderGiaRisposto(numDomanda) {
-    const isUltima = numDomanda >= DOMANDE.length;
+  function renderGiaRisposto() {
+    const ultima = domandaAttiva >= DOMANDE.length;
     app.innerHTML = `
       <div style="text-align:center;padding:1.5rem 0">
         <div class="success-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
-            stroke="#1A6B4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1A6B4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
         </div>
-        <p style="font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:0.5rem">
-          ${isUltima ? 'Grazie per aver partecipato!' : 'Risposta registrata!'}
-        </p>
-        <p style="font-size:0.875rem;color:var(--muted)">
-          ${isUltima ? 'Hai completato tutte le domande.' : 'In attesa della prossima domanda...'}
-        </p>
-        ${!isUltima ? `
-        <div style="margin-top:1.5rem">
-          <span class="waiting-dot"></span>
-          <span class="waiting-dot"></span>
-          <span class="waiting-dot"></span>
-        </div>` : ''}
-      </div>
-    `;
+        <p style="font-family:'DM Serif Display',serif;font-size:1.3rem;margin-bottom:0.5rem">${ultima ? 'Grazie!' : 'Risposta registrata!'}</p>
+        <p style="font-size:0.875rem;color:var(--muted)">${ultima ? 'Hai completato tutte le domande.' : 'In attesa della prossima domanda...'}</p>
+        ${!ultima ? `<div style="margin-top:1.5rem"><span class="waiting-dot"></span><span class="waiting-dot"></span><span class="waiting-dot"></span></div>` : ''}
+      </div>`;
   }
 
-  // ─── FINE SONDAGGIO ───────────────────────────────────────────────────────
+  // ─── FINE ─────────────────────────────────────────────────────────────────
   function renderFine() {
     app.innerHTML = `
       <div style="text-align:center;padding:1.5rem 0">
         <div class="success-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
-            stroke="#1A6B4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#1A6B4A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
         </div>
         <p style="font-family:'DM Serif Display',serif;font-size:1.4rem;margin-bottom:0.5rem">Grazie!</p>
-        <p style="font-size:0.9rem;color:var(--muted)">Hai completato tutte le domande del sondaggio.</p>
-      </div>
-    `;
+        <p style="font-size:0.9rem;color:var(--muted)">Hai completato tutte le domande.</p>
+      </div>`;
   }
 
-  // ─── RENDER DOMANDA ───────────────────────────────────────────────────────
-  function renderDomanda(numDomanda) {
-    const d = DOMANDE[numDomanda - 1];
+  // ─── DOMANDA ──────────────────────────────────────────────────────────────
+  function renderDomanda(n) {
+    const d = DOMANDE[n - 1];
     rispostaCorrente = null;
 
     let inputHtml = '';
-    if (d.tipo === 'sinno') inputHtml = renderSiNo();
-    else if (d.tipo === 'numero') inputHtml = renderNumero(d);
-    else if (d.tipo === 'multipla') inputHtml = renderMultipla(d);
-    else if (d.tipo === 'scala') inputHtml = renderScala(d);
+    if (d.tipo === 'sinno') {
+      inputHtml = `<div class="yn-grid">
+        <button class="yn-btn" id="btn-si" onclick="selSiNo('si')">Si</button>
+        <button class="yn-btn" id="btn-no" onclick="selSiNo('no')">No</button>
+      </div>`;
+    } else if (d.tipo === 'numero') {
+      rispostaCorrente = String(d.default);
+      inputHtml = `<div class="slider-wrap">
+        <div class="slider-val" id="slider-val">${d.default}</div>
+        <input type="range" id="slider-num" min="${d.min}" max="${d.max}" value="${d.default}" step="1">
+        <div class="slider-minmax"><span>${d.min}</span><span>${d.max}</span></div>
+      </div>`;
+    } else if (d.tipo === 'multipla') {
+      inputHtml = `<div class="mc-grid">${d.opzioni.map((op,i) =>
+        `<button class="mc-btn" id="mc-${i}" onclick="selMC(${i},'${op.replace(/'/g,"\\'")}')">${op}</button>`
+      ).join('')}</div>`;
+    } else if (d.tipo === 'scala') {
+      inputHtml = `
+        <div class="scale-grid">${[1,2,3,4,5].map(v =>
+          `<button class="scale-btn" id="sc-${v}" onclick="selScala(${v})">${v}</button>`
+        ).join('')}</div>
+        <div class="scale-labels"><span>${d.labelMin}</span><span>${d.labelMax}</span></div>`;
+    }
 
     app.innerHTML = `
-      ${stepIndicator(numDomanda)}
+      ${stepIndicator(n)}
       <div class="badge-${gruppo}">Gruppo ${gruppo}</div>
       <p class="question">${d.testo}</p>
       <p class="subtitle">${d.sottotitolo}</p>
       ${inputHtml}
-      <button class="primary-btn" id="invia-btn" onclick="inviaRisposta(${numDomanda})" disabled>Invia risposta</button>
+      <button class="primary-btn" id="invia-btn" onclick="inviaRisposta(${n})" ${d.tipo === 'numero' ? '' : 'disabled'}>Invia risposta</button>
     `;
 
     if (d.tipo === 'numero') {
       const slider = document.getElementById('slider-num');
-      const valEl = document.getElementById('slider-val');
-      rispostaCorrente = String(d.default);
+      const valEl  = document.getElementById('slider-val');
       slider.addEventListener('input', () => {
         valEl.textContent = slider.value;
         rispostaCorrente = slider.value;
-        document.getElementById('invia-btn').disabled = false;
       });
-      document.getElementById('invia-btn').disabled = false;
     }
-  }
-
-  function renderSiNo() {
-    return `<div class="yn-grid">
-      <button class="yn-btn" id="btn-si" onclick="selSiNo('si')">Si</button>
-      <button class="yn-btn" id="btn-no" onclick="selSiNo('no')">No</button>
-    </div>`;
   }
 
   window.selSiNo = function(val) {
     rispostaCorrente = val;
-    const si = document.getElementById('btn-si');
-    const no = document.getElementById('btn-no');
-    si.className = 'yn-btn' + (val === 'si' ? ' yes' : '');
-    no.className = 'yn-btn' + (val === 'no' ? ' no' : '');
+    document.getElementById('btn-si').className = 'yn-btn' + (val==='si' ? ' yes' : '');
+    document.getElementById('btn-no').className = 'yn-btn' + (val==='no' ? ' no'  : '');
     document.getElementById('invia-btn').disabled = false;
   };
 
-  function renderNumero(d) {
-    return `
-      <div class="slider-wrap">
-        <div class="slider-val" id="slider-val">${d.default}</div>
-        <input type="range" id="slider-num" min="${d.min}" max="${d.max}" value="${d.default}" step="1">
-        <div class="slider-minmax"><span>${d.min}</span><span>${d.max}</span></div>
-      </div>
-    `;
-  }
-
-  function renderMultipla(d) {
-    return `<div class="mc-grid">
-      ${d.opzioni.map((op, i) => `
-        <button class="mc-btn" id="mc-${i}" onclick="selMultipla(${i}, '${op.replace(/'/g,"\\'")}')">
-          ${op}
-        </button>`).join('')}
-    </div>`;
-  }
-
-  window.selMultipla = function(idx, val) {
+  window.selMC = function(idx, val) {
     rispostaCorrente = val;
-    document.querySelectorAll('.mc-btn').forEach((b,i) => {
-      b.className = 'mc-btn' + (i === idx ? ' selected' : '');
-    });
+    document.querySelectorAll('.mc-btn').forEach((b,i) => b.className = 'mc-btn' + (i===idx ? ' selected' : ''));
     document.getElementById('invia-btn').disabled = false;
   };
-
-  function renderScala(d) {
-    return `
-      <div class="scale-grid">
-        ${[1,2,3,4,5].map(n => `
-          <button class="scale-btn" id="sc-${n}" onclick="selScala(${n})">${n}</button>
-        `).join('')}
-      </div>
-      <div class="scale-labels"><span>${d.labelMin}</span><span>${d.labelMax}</span></div>
-    `;
-  }
 
   window.selScala = function(val) {
     rispostaCorrente = String(val);
-    [1,2,3,4,5].forEach(n => {
-      const b = document.getElementById('sc-'+n);
-      if (b) b.className = 'scale-btn' + (n === val ? ' selected' : '');
+    [1,2,3,4,5].forEach(v => {
+      const b = document.getElementById('sc-'+v);
+      if (b) b.className = 'scale-btn' + (v===val ? ' selected' : '');
     });
     document.getElementById('invia-btn').disabled = false;
   };
 
-  // ─── INVIO RISPOSTA ───────────────────────────────────────────────────────
-  window.inviaRisposta = async function(numDomanda) {
+  // ─── INVIO RISPOSTA con retry ──────────────────────────────────────────────
+  window.inviaRisposta = async function(n) {
     if (!rispostaCorrente || !gruppo) return;
     const btn = document.getElementById('invia-btn');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>Invio...';
 
-    let attempts = 0;
-    const maxAttempts = 3;
-
-    while (attempts < maxAttempts) {
+    for (let attempt = 1; attempt <= 3; attempt++) {
       try {
         const { error } = await supabase.from('risposte').insert({
-          gruppo: gruppo,
-          domanda: numDomanda,
-          valore: String(rispostaCorrente)
+          gruppo, domanda: n, valore: String(rispostaCorrente)
         });
         if (error) throw error;
-        segnaRisposto(numDomanda);
-        renderGiaRisposto(numDomanda);
+        segnaRisposto(n);
+        renderGiaRisposto();
         return;
       } catch(e) {
-        attempts++;
-        if (attempts >= maxAttempts) {
+        if (attempt < 3) await new Promise(r => setTimeout(r, 600 * attempt));
+        else {
           btn.disabled = false;
-          btn.textContent = 'Riprova';
+          btn.textContent = 'Errore — Riprova';
           btn.style.background = '#9B3B1E';
-          return;
         }
-        await new Promise(r => setTimeout(r, 800 * attempts));
       }
     }
   };
 
-  // ─── REALTIME: AGGIORNA DOMANDA ATTIVA ────────────────────────────────────
+  // ─── REALTIME STATO ───────────────────────────────────────────────────────
   function subscribeStato() {
-    supabase.channel('stato-evento')
+    supabase
+      .channel('stato-questionario')
       .on('postgres_changes', {
-        event: 'UPDATE', schema: 'public', table: 'stato_evento', filter: 'id=eq.evento'
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'stato_evento',
+        filter: 'id=eq.evento'
       }, payload => {
-        const nuovaDomanda = payload.new.domanda_attiva;
-        if (nuovaDomanda !== domandaAttiva) {
-          domandaAttiva = nuovaDomanda;
-          renderDomandaOAttesa(domandaAttiva);
+        const nuova = payload.new.domanda_attiva;
+        if (nuova !== domandaAttiva) {
+          domandaAttiva = nuova;
+          render();
         }
       })
-      .subscribe();
+      .subscribe((status) => {
+        // Se la subscription fallisce, fallback a polling ogni 4s
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          setInterval(async () => {
+            const { data } = await supabase
+              .from('stato_evento').select('domanda_attiva').eq('id','evento').single();
+            if (data && data.domanda_attiva !== domandaAttiva) {
+              domandaAttiva = data.domanda_attiva;
+              render();
+            }
+          }, 4000);
+        }
+      });
   }
 
   // ─── INIT ─────────────────────────────────────────────────────────────────
   async function init() {
-    // Recupera gruppo da cookie se gia scelto
-    const cookieGruppo = getCookie(COOKIE_GRUPPO);
-    if (cookieGruppo) gruppo = cookieGruppo;
+    gruppo = getCookie(COOKIE_GRUPPO) || null;
 
-    // Carica stato attuale
     const { data, error } = await supabase
       .from('stato_evento').select('domanda_attiva').eq('id','evento').single();
 
     if (error || !data) {
-      app.innerHTML = `<p style="color:#9B3B1E;text-align:center;padding:1rem">Errore di connessione. Ricarica la pagina.</p>`;
+      app.innerHTML = `<p style="color:#9B3B1E;text-align:center;padding:1rem">Errore di connessione.<br>Ricarica la pagina.</p>`;
       return;
     }
 
     domandaAttiva = data.domanda_attiva;
     subscribeStato();
-
-    if (!gruppo) {
-      renderSceltaGruppo();
-    } else {
-      renderDomandaOAttesa(domandaAttiva);
-    }
+    render();
   }
 
   init();
